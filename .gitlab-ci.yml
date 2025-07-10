@@ -1,0 +1,58 @@
+stages:
+  - backend-build
+  - backend-test
+  - frontend-build
+  - deploy
+
+variables:
+  GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+  NODE_ENV: "production"
+
+cache:
+  paths:
+    - .gradle/caches/
+    - .gradle/wrapper/
+    - frontend/node_modules/
+
+backend_build:
+  stage: backend-build
+  image: openjdk:17
+  script:
+    - ./gradlew build
+  artifacts:
+    paths:
+      - build/libs/
+    expire_in: 1 hour
+
+backend_test:
+  stage: backend-test
+  image: openjdk:17
+  script:
+    - ./gradlew test
+
+frontend_build:
+  stage: frontend-build
+  image: node:18
+  rules:
+    - exists:
+        - frontend/package.json
+  script:
+    - cd frontend
+    - npm install
+    - npm run lint
+    - npm test
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/build/
+    expire_in: 1 hour
+
+deploy:
+  stage: deploy
+  image: node:18
+  script:
+    - apt-get update && apt-get install -y curl git  # Für Heroku-CLI
+    - curl https://cli-assets.heroku.com/install.sh | sh
+    - heroku deploy:jar build/libs/*.jar --app dein-heroku-app-name
+  only:
+    - main
