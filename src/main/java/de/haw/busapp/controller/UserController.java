@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -36,4 +37,23 @@ public class UserController {
         private String password;
         private User.Role role;
     }
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@RequestBody LoginRequest request) {
+        Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
+        if (userOpt.isEmpty() || !userOpt.get().getPassword().equals(request.getPassword())) {
+            return ResponseEntity.status(401).body("Ungültige Anmeldedaten");
+        }
+        User user = userOpt.get();
+
+
+        // Erfolg: schick die User-ID oder einen Token zurück
+        return ResponseEntity.ok("Anmeldung erfolgreich! UserID: " + user.getId());
+    }
+
+    @Data
+    public static class LoginRequest {
+        private String email;
+        private String password;
+    }
+
 }
