@@ -1,9 +1,7 @@
 package de.haw.busapp.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -11,7 +9,10 @@ import java.util.List;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class FerryRide {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

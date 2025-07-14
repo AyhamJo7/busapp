@@ -1,5 +1,6 @@
 package de.haw.busapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class Cabin {
     private Long id;
 
     @ManyToOne
+    @JsonIgnore
     private Ship ship;
 
     @Enumerated(EnumType.STRING)

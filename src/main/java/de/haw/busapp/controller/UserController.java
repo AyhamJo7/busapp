@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -23,7 +25,7 @@ public class UserController {
                 .email(request.getEmail())
                 .name(request.getName())
                 .password(request.getPassword())
-                .role(request.getRole())
+                .role(User.Role.USER)
                 .build();
         user = userRepository.save(user);
         URI location = URI.create("/api/users/" + user.getId());
@@ -38,17 +40,23 @@ public class UserController {
         private User.Role role;
     }
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody LoginRequest request) {
+    public ResponseEntity<Map<String, Object>> loginUser(@RequestBody LoginRequest request) {
         Optional<User> userOpt = userRepository.findByEmail(request.getEmail());
+
         if (userOpt.isEmpty() || !userOpt.get().getPassword().equals(request.getPassword())) {
-            return ResponseEntity.status(401).body("Ungültige Anmeldedaten");
+            return ResponseEntity.status(401).body(Map.of("error", "Ungültige Anmeldedaten"));
         }
+
         User user = userOpt.get();
 
+        // JSON-Response mit ID und Rolle
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", user.getId());
+        response.put("role", user.getRole().name()); // z. B. ADMIN oder USER
 
-        // Erfolg: schick die User-ID oder einen Token zurück
-        return ResponseEntity.ok("Anmeldung erfolgreich! UserID: " + user.getId());
+        return ResponseEntity.ok(response);
     }
+
 
     @Data
     public static class LoginRequest {

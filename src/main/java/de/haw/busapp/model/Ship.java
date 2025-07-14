@@ -1,5 +1,6 @@
 package de.haw.busapp.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
@@ -15,5 +16,6 @@ public class Ship {
     private int capacity;
 
     @OneToMany(mappedBy = "ship", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Cabin> cabins;
 }

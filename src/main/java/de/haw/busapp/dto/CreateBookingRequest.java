@@ -6,7 +6,6 @@ import lombok.Setter;
 
 @Data
 public class CreateBookingRequest {
-    // Wenn Lombok nicht funktioniert:
     @Setter
     @Getter
     private Long userId;
