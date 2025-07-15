@@ -18,6 +18,7 @@ backend_build:
   stage: backend-build
   image: openjdk:17
   script:
+    - chmod +x gradlew
     - ./gradlew build
   artifacts:
     paths:
