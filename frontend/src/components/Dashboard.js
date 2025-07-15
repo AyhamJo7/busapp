@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 export default function Dashboard() {
@@ -10,17 +10,57 @@ export default function Dashboard() {
     const [showRides, setShowRides] = useState(false);
     const [loadingRides, setLoadingRides] = useState(false);
 
-    // State für das Fahrten-Hinzufügen-Formular
-    const [newRide, setNewRide] = useState({ fahrtName: "", datum: "" });
+    const [ships, setShips] = useState([]); // 🆕 Liste aller Schiffe
+    const [routes, setRoutes] = useState([]); // 🆕 Liste aller Routen
+
+    const [newRide, setNewRide] = useState({ routeId: "", shipId: "", departureTime: "", arrivalTime: "" });
     const [addSuccess, setAddSuccess] = useState(false);
 
     const [userRole, setUserRole] = useState(null);
+    const [selectedRideId, setSelectedRideId] = useState(null);
 
-    React.useEffect(() => {
+    useEffect(() => {
         const role = localStorage.getItem("userRole");
         setUserRole(role); // z. B. ADMIN oder USER
+
+        // 🆕 Schiffe und Routen beim Laden holen
+        fetchAllShips();
+        fetchAllRoutes();
     }, []);
 
+    // 🆕 Alle Schiffe laden
+    const fetchAllShips = async () => {
+        try {
+            const response = await fetch("http://localhost:8080/api/ships");
+            if (response.ok) {
+                const data = await response.json();
+                setShips(data);
+            } else {
+                console.error("Fehler beim Laden der Schiffe:", response.status);
+            }
+        } catch (error) {
+            console.error("Netzwerk-/Client-Fehler beim Laden der Schiffe:", error);
+        }
+    };
+
+    // 🆕 Alle Routen laden
+    const fetchAllRoutes = async () => {
+        try {
+            const response = await fetch("http://localhost:8080/api/routes");
+
+            console.log("fetchAllRoutes()", response); // Debugging
+            if (response.ok) {
+                const data = await response.json();
+                setRoutes(data);
+            } else {
+                console.error("Fehler beim Laden der Routen:", response.status);
+            }
+        } catch (error) {
+            console.error("Netzwerk-/Client-Fehler beim Laden der Routen:", error);
+        }
+    };
+
+    // Fahrt hinzufügen
     const handleAddRide = async (e) => {
         e.preventDefault();
 
@@ -28,73 +68,182 @@ export default function Dashboard() {
             routeId: parseInt(newRide.routeId),
             shipId: parseInt(newRide.shipId),
             departureTime: newRide.departureTime + ":00", // Sekunden ergänzen
-            arrivalTime: newRide.arrivalTime + ":00"
+            arrivalTime: newRide.arrivalTime + ":00",
         };
 
         console.log("Neuer Ride Payload:", payload); // 👈 Debuggen
 
         try {
-            await axios.post("/api/rides", payload);
-            setAddSuccess(true);
-            setNewRide({ routeId: "", shipId: "", departureTime: "", arrivalTime: "" });
-        } catch (err) {
-            if (err.response) {
-                console.error("Backend-Fehler:", err.response.status, err.response.data);
-                alert(`Fehler ${err.response.status}: ${err.response.data.message || "Fahrt konnte nicht hinzugefügt werden."}`);
+            const response = await fetch("http://localhost:8080/api/rides", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            if (response.ok) {
+                alert("Fahrt erfolgreich hinzugefügt!");
+                setAddSuccess(true);
+                setNewRide({ routeId: "", shipId: "", departureTime: "", arrivalTime: "" });
             } else {
-                console.error("Netzwerk-/Client-Fehler:", err);
-                alert("Netzwerkproblem oder Server nicht erreichbar.");
+                const errorData = await response.json().catch(() => ({}));
+                console.error("Backend-Fehler:", response.status, errorData);
+                alert(`Fehler ${response.status}: ${errorData.message || "Fahrt konnte nicht hinzugefügt werden."}`);
+                setAddSuccess(false);
             }
+        } catch (error) {
+            console.error("Netzwerk-/Client-Fehler:", error);
+            alert("Netzwerkproblem oder Server nicht erreichbar.");
             setAddSuccess(false);
         }
     };
 
-
+    // Buchungen laden
     const handleShowBookings = async () => {
         setShowRides(false);
         setShowBookings(true);
         setLoadingBookings(true);
+
         try {
-            const res = await axios.get("/api/bookings");
-            setBookings(res.data);
-        } catch {
+            const response = await fetch("http://localhost:8080/api/bookings");
+            if (response.ok) {
+                const data = await response.json();
+                setBookings(data);
+            } else {
+                console.error("Fehler beim Laden der Buchungen:", response.status);
+                setBookings([]);
+            }
+        } catch (error) {
+            console.error("Netzwerk-/Client-Fehler beim Laden der Buchungen:", error);
             setBookings([]);
         }
         setLoadingBookings(false);
     };
 
+    // Fahrten laden
     const handleShowRides = async () => {
         setShowBookings(false);
         setShowRides(true);
         setLoadingRides(true);
+
         try {
-            const res = await axios.get("/api/rides");
-            console.log("Rides geladen:", res.data);
-            setRides(res.data);
-        } catch {
+            const response = await fetch("http://localhost:8080/api/rides");
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Rides geladen:", data);
+                setRides(data);
+            } else {
+                console.error("Fehler beim Laden der Rides:", response.status);
+                setRides([]);
+            }
+        } catch (error) {
+            console.error("Netzwerk-/Client-Fehler beim Laden der Rides:", error);
             setRides([]);
         }
         setLoadingRides(false);
     };
 
+    const handleCreateBooking = async () => {
+        if (!selectedRideId) {
+            alert("Bitte wähle eine Fahrt aus.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:8080/api/bookings", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rideId: parseInt(selectedRideId) }), // Backend erwartet rideId
+            });
+
+            if (response.ok) {
+                alert("Buchung erfolgreich erstellt!");
+                setSelectedRideId(""); // Reset Auswahl
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                alert(`Fehler ${response.status}: ${errorData.message || "Buchung fehlgeschlagen."}`);
+            }
+        } catch (error) {
+            console.error("Netzwerk-/Client-Fehler:", error);
+            alert("Netzwerkproblem oder Server nicht erreichbar.");
+        }
+    };
+
     return (
-        <div>
-            <h2>Willkommen im Dashboard!</h2>
-            <button onClick={handleShowBookings}>Meine Buchungen</button>
-            <button onClick={handleShowRides}>Fahrt buchen</button>
+        <div
+            style={{
+                fontFamily: "sans-serif",
+                background: "linear-gradient(to bottom, #e0f7fa, #ffffff)",
+                minHeight: "100vh",
+                padding: "20px",
+                color: "#023047",
+            }}
+        >
+            <h1 style={{ textAlign: "center", color: "#0077b6" }}>
+                🚢 FerryBooking
+            </h1>
+
+            <div style={{ display: "flex", justifyContent: "center", gap: "20px", marginBottom: "30px" }}>
+                <button
+                    onClick={handleShowBookings}
+                    style={{
+                        backgroundColor: showBookings ? "#0077b6" : "#90e0ef",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "20px",
+                        padding: "10px 20px",
+                        boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                        cursor: "pointer",
+                        transition: "0.3s",
+                    }}
+                >
+                    📖 Meine Buchungen
+                </button>
+                <button
+                    onClick={handleShowRides}
+                    style={{
+                        backgroundColor: showRides ? "#0077b6" : "#90e0ef",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "20px",
+                        padding: "10px 20px",
+                        boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                        cursor: "pointer",
+                        transition: "0.3s",
+                    }}
+                >
+                    🚤 Fahrt buchen
+                </button>
+            </div>
 
             {showBookings && (
-                <div style={{ marginTop: "20px" }}>
-                    <h3>Meine Buchungen</h3>
+                <div
+                    style={{
+                        backgroundColor: "#caf0f8",
+                        borderRadius: "10px",
+                        padding: "20px",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                        marginBottom: "20px",
+                    }}
+                >
+                    <h3 style={{ color: "#0077b6" }}>📖 Meine Buchungen</h3>
                     {loadingBookings ? (
-                        <div>Lade Buchungen...</div>
+                        <div>⏳ Lade Buchungen...</div>
                     ) : bookings.length === 0 ? (
-                        <div>Keine Buchungen vorhanden.</div>
+                        <div>❌ Keine Buchungen vorhanden.</div>
                     ) : (
-                        <ul>
+                        <ul style={{ listStyle: "none", padding: 0 }}>
                             {bookings.map(b => (
-                                <li key={b.id}>
-                                    {b.fahrtName} am {b.datum}
+                                <li
+                                    key={b.id}
+                                    style={{
+                                        backgroundColor: "#ffffff",
+                                        borderRadius: "8px",
+                                        padding: "10px",
+                                        margin: "8px 0",
+                                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                                    }}
+                                >
+                                    🛳 {b.fahrtName} am {b.datum}
                                 </li>
                             ))}
                         </ul>
@@ -103,74 +252,162 @@ export default function Dashboard() {
             )}
 
             {showRides && (
-                <div style={{ marginTop: "20px" }}>
-                    <h3>Verfügbare Fahrten</h3>
+                <div
+                    style={{
+                        backgroundColor: "#caf0f8",
+                        borderRadius: "10px",
+                        padding: "20px",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                    }}
+                >
+                    <h3 style={{ color: "#0077b6" }}>🚤 Verfügbare Fahrten</h3>
                     {loadingRides ? (
-                        <div>Lade Fahrten...</div>
+                        <div>⏳ Lade Fahrten...</div>
                     ) : rides.length === 0 ? (
-                        <div>Keine Fahrten verfügbar.</div>
+                        <div>❌ Keine Fahrten verfügbar.</div>
                     ) : (
-                        <ul>
-                            {rides.map(r => (
-                                <li key={r.id}>
-                                    Fahrt #{r.id}: {r.departureTime} → {r.arrivalTime}
-                                </li>
-                            ))}
-                        </ul>
+                        <>
+                            <select
+                                value={selectedRideId}
+                                onChange={e => setSelectedRideId(e.target.value)}
+                                required
+                                style={{
+                                    width: "100%",
+                                    padding: "10px",
+                                    margin: "10px 0",
+                                    borderRadius: "8px",
+                                    border: "1px solid #0077b6",
+                                }}
+                            >
+                                <option value="">⚓ Fahrt auswählen</option>
+                                {rides.map(r => (
+                                    <option key={r.id} value={r.id}>
+                                        {r.route.originHarbor.name} ➡ {r.route.destinationHarbor.name} | 🕒 {r.departureTime} → {r.arrivalTime} | 🚢 {r.ship.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                onClick={handleCreateBooking}
+                                style={{
+                                    backgroundColor: "#0077b6",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: "20px",
+                                    padding: "10px 20px",
+                                    cursor: "pointer",
+                                    transition: "0.3s",
+                                }}
+                            >
+                                ✅ Fahrt buchen
+                            </button>
+                        </>
                     )}
                 </div>
             )}
 
             {userRole === "ADMIN" && (
-                <div style={{ marginTop: "30px" }}>
-                    <h3>Neue Fahrt hinzufügen (nur Admin)</h3>
+                <div
+                    style={{
+                        backgroundColor: "#ffe5ec",
+                        borderRadius: "10px",
+                        padding: "20px",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                        marginTop: "30px",
+                    }}
+                >
+                    <h3 style={{ color: "#d00000" }}>⚙️ Neue Fahrt hinzufügen (Admin)</h3>
                     <form onSubmit={handleAddRide}>
-                        {/* Route auswählen */}
                         <select
                             value={newRide.routeId}
                             onChange={e => setNewRide({ ...newRide, routeId: e.target.value })}
                             required
+                            style={{
+                                width: "100%",
+                                padding: "10px",
+                                margin: "10px 0",
+                                borderRadius: "8px",
+                                border: "1px solid #d00000",
+                            }}
                         >
-                            <option value="">Route wählen</option>
-                            <option value="1">Route 1</option>
-                            <option value="2">Route 2</option>
-                            {/* Optional: dynamisch aus API laden */}
+                            <option value="">⚓ Route wählen</option>
+                            {routes.map(route => (
+                                <option key={route.id} value={route.id}>
+                                    {route.originHarbor.name} ➡ {route.destinationHarbor.name}
+                                </option>
+                            ))}
                         </select>
 
-                        {/* Ship auswählen */}
                         <select
                             value={newRide.shipId}
                             onChange={e => setNewRide({ ...newRide, shipId: e.target.value })}
                             required
+                            style={{
+                                width: "100%",
+                                padding: "10px",
+                                margin: "10px 0",
+                                borderRadius: "8px",
+                                border: "1px solid #d00000",
+                            }}
                         >
-                            <option value="">Schiff wählen</option>
-                            <option value="1">Schiff A</option>
-                            <option value="2">Schiff B</option>
-                            {/* Optional: dynamisch aus API laden */}
+                            <option value="">🚢 Schiff wählen</option>
+                            {ships.map(ship => (
+                                <option key={ship.id} value={ship.id}>
+                                    {ship.name}
+                                </option>
+                            ))}
                         </select>
 
-                        {/* Abfahrtszeit */}
                         <input
                             type="datetime-local"
                             value={newRide.departureTime}
                             onChange={e => setNewRide({ ...newRide, departureTime: e.target.value })}
                             required
+                            style={{
+                                width: "100%",
+                                padding: "10px",
+                                margin: "10px 0",
+                                borderRadius: "8px",
+                                border: "1px solid #d00000",
+                            }}
                         />
 
-                        {/* Ankunftszeit */}
                         <input
                             type="datetime-local"
                             value={newRide.arrivalTime}
                             onChange={e => setNewRide({ ...newRide, arrivalTime: e.target.value })}
                             required
+                            style={{
+                                width: "100%",
+                                padding: "10px",
+                                margin: "10px 0",
+                                borderRadius: "8px",
+                                border: "1px solid #d00000",
+                            }}
                         />
 
-                        <button type="submit">Hinzufügen</button>
+                        <button
+                            type="submit"
+                            style={{
+                                backgroundColor: "#d00000",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "20px",
+                                padding: "10px 20px",
+                                cursor: "pointer",
+                                transition: "0.3s",
+                            }}
+                        >
+                            ➕ Hinzufügen
+                        </button>
                     </form>
-
-                    {addSuccess && <div>Fahrt erfolgreich hinzugefügt!</div>}
+                    {addSuccess && (
+                        <div style={{ color: "green", marginTop: "10px" }}>
+                            ✅ Fahrt erfolgreich hinzugefügt!
+                        </div>
+                    )}
                 </div>
             )}
         </div>
     );
+
 }

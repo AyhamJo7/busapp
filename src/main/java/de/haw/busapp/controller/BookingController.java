@@ -29,16 +29,16 @@ public class BookingController {
     @Autowired
     private CabinRepository cabinRepository;
 
-    @PostMapping("/bookings")
+    @PostMapping
     public ResponseEntity<Void> createBooking(@RequestBody CreateBookingRequest request) {
         User user = userRepository.findById(request.getUserId()).orElseThrow();
         FerryRide ferryRide = ferryRideRepository.findById(request.getFerryRideId()).orElseThrow();
-        Cabin cabin = cabinRepository.findById(request.getCabinId()).orElseThrow();
+        //Cabin cabin = cabinRepository.findById(request.getCabinId()).orElseThrow();
 
         Booking booking = new Booking();
         booking.setUser(user);
         booking.setFerryRide(ferryRide);
-        booking.setCabin(cabin);
+        //booking.setCabin(cabin);
         booking.setBookingDate(request.getBookingDate());
 
         booking = bookingRepository.save(booking);

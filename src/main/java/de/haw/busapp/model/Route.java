@@ -17,4 +17,10 @@ public class Route {
     @ManyToOne
     @JoinColumn(name = "destination_harbor_id")
     private Harbor destinationHarbor;
+
+    @Override
+    public String toString() {
+        return originHarbor.getName() + " → " + destinationHarbor.getName();
+    }
+
 }

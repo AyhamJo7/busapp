@@ -75,68 +75,185 @@ const AuthForm = () => {
 
 
     return (
-        <div className="auth-container">
-            <div className="tabs">
-                <button
-                    className={isRegistering ? "active" : ""}
-                    onClick={() => setIsRegistering(true)}
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: "100vh",
+                background: "linear-gradient(to bottom, #caf0f8, #ffffff)",
+                fontFamily: "sans-serif",
+            }}
+        >
+            <div
+                style={{
+                    backgroundColor: "#ffffff",
+                    borderRadius: "15px",
+                    boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
+                    width: "350px",
+                    padding: "30px",
+                    textAlign: "center",
+                }}
+            >
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-around",
+                        marginBottom: "20px",
+                    }}
                 >
-                    Registrieren
-                </button>
-                <button
-                    className={!isRegistering ? "active" : ""}
-                    onClick={() => setIsRegistering(false)}
-                >
-                    Anmelden
-                </button>
-            </div>
+                    <button
+                        onClick={() => setIsRegistering(true)}
+                        style={{
+                            flex: 1,
+                            backgroundColor: isRegistering ? "#0077b6" : "#90e0ef",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "20px 0 0 20px",
+                            padding: "10px",
+                            cursor: "pointer",
+                            transition: "0.3s",
+                            fontWeight: "bold",
+                        }}
+                    >
+                        📝 Registrieren
+                    </button>
+                    <button
+                        onClick={() => setIsRegistering(false)}
+                        style={{
+                            flex: 1,
+                            backgroundColor: !isRegistering ? "#0077b6" : "#90e0ef",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: "0 20px 20px 0",
+                            padding: "10px",
+                            cursor: "pointer",
+                            transition: "0.3s",
+                            fontWeight: "bold",
+                        }}
+                    >
+                        🔑 Anmelden
+                    </button>
+                </div>
 
-            {isRegistering ? (
-                <form onSubmit={handleRegister}>
-                    <input
-                        type="text"
-                        placeholder="Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="email"
-                        placeholder="E-Mail"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="password"
-                        placeholder="Passwort"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                    <button type="submit">Registrieren</button>
-                </form>
-            ) : (
-                <form onSubmit={handleLogin}>
-                    <input
-                        type="email"
-                        placeholder="E-Mail"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                    <input
-                        type="password"
-                        placeholder="Passwort"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                    <button type="submit">Anmelden</button>
-                </form>
-            )}
+                {isRegistering ? (
+                    <form onSubmit={handleRegister}>
+                        <input
+                            type="text"
+                            placeholder="👤 Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                            style={{
+                                width: "100%",
+                                padding: "10px",
+                                margin: "10px 0",
+                                border: "1px solid #0077b6",
+                                borderRadius: "10px",
+                                outline: "none",
+                            }}
+                        />
+                        <input
+                            type="email"
+                            placeholder="📧 E-Mail"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            style={{
+                                width: "100%",
+                                padding: "10px",
+                                margin: "10px 0",
+                                border: "1px solid #0077b6",
+                                borderRadius: "10px",
+                                outline: "none",
+                            }}
+                        />
+                        <input
+                            type="password"
+                            placeholder="🔒 Passwort"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            style={{
+                                width: "100%",
+                                padding: "10px",
+                                margin: "10px 0",
+                                border: "1px solid #0077b6",
+                                borderRadius: "10px",
+                                outline: "none",
+                            }}
+                        />
+                        <button
+                            type="submit"
+                            style={{
+                                width: "100%",
+                                backgroundColor: "#0077b6",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "10px",
+                                padding: "10px",
+                                cursor: "pointer",
+                                transition: "0.3s",
+                                fontWeight: "bold",
+                            }}
+                        >
+                            ✅ Registrieren
+                        </button>
+                    </form>
+                ) : (
+                    <form onSubmit={handleLogin}>
+                        <input
+                            type="email"
+                            placeholder="📧 E-Mail"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            style={{
+                                width: "100%",
+                                padding: "10px",
+                                margin: "10px 0",
+                                border: "1px solid #0077b6",
+                                borderRadius: "10px",
+                                outline: "none",
+                            }}
+                        />
+                        <input
+                            type="password"
+                            placeholder="🔒 Passwort"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            style={{
+                                width: "100%",
+                                padding: "10px",
+                                margin: "10px 0",
+                                border: "1px solid #0077b6",
+                                borderRadius: "10px",
+                                outline: "none",
+                            }}
+                        />
+                        <button
+                            type="submit"
+                            style={{
+                                width: "100%",
+                                backgroundColor: "#0077b6",
+                                color: "#fff",
+                                border: "none",
+                                borderRadius: "10px",
+                                padding: "10px",
+                                cursor: "pointer",
+                                transition: "0.3s",
+                                fontWeight: "bold",
+                            }}
+                        >
+                            ✅ Anmelden
+                        </button>
+                    </form>
+                )}
+            </div>
         </div>
     );
+
 };
 
 export default AuthForm;

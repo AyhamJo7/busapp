@@ -19,4 +19,9 @@ public class ShipController {
         Ship saved = shipRepository.save(request);
         return ResponseEntity.ok(saved);
     }
+
+    @GetMapping
+    public ResponseEntity<?> getAllShips() {
+        return ResponseEntity.ok(shipRepository.findAll());
+    }
 }

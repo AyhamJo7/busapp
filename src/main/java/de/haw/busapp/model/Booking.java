@@ -44,4 +44,15 @@ public class Booking {
     public void setBookingDate(LocalDateTime bookingDate) {
         this.bookingDate = Objects.requireNonNull(bookingDate, "Buchungsdatum darf nicht null sein");
     }
+
+    @Override
+    public String toString() {
+        return "Booking{" +
+                "id=" + id +
+                ", user=" + (user != null ? user.getId() : "null") +
+                ", ferryRide=" + (ferryRide != null ? ferryRide.getId() : "null") +
+                ", cabin=" + (cabin != null ? cabin.getId() : "null") +
+                ", bookingDate=" + bookingDate +
+                '}';
+    }
 }

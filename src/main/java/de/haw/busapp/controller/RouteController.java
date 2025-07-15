@@ -18,4 +18,9 @@ public class RouteController {
         Route saved = routeRepository.save(request);
         return ResponseEntity.ok(saved);
     }
+
+    @GetMapping
+    public ResponseEntity<?> getAllRoutes() {
+        return ResponseEntity.ok(routeRepository.findAll());
+    }
 }
