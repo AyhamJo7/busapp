@@ -16,9 +16,8 @@ cache:
 
 backend_build:
   stage: backend-build
-  image: openjdk:17
+  image: eclipse-temurin:17
   script:
-    - apt-get update && apt-get install -y findutils
     - chmod +x gradlew
     - ./gradlew build
   artifacts:
@@ -28,7 +27,7 @@ backend_build:
 
 backend_test:
   stage: backend-test
-  image: openjdk:17
+  image: eclipse-temurin:17
   script:
     - ./gradlew test
 
