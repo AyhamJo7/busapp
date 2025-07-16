@@ -1,5 +1,6 @@
 package de.haw.busapp.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,6 +30,7 @@ public class FerryRide {
     @Getter
     @OneToMany(mappedBy = "ferryRide", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
+    @JsonManagedReference
     private List<Booking> bookings = new ArrayList<>();
 
     public void addBooking(Booking booking) {

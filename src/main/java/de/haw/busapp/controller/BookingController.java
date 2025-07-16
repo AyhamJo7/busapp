@@ -1,5 +1,6 @@
 package de.haw.busapp.controller;
 
+import de.haw.busapp.dto.CreateBookingRequest;
 import de.haw.busapp.model.Booking;
 import de.haw.busapp.model.User;
 import de.haw.busapp.model.FerryRide;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -29,6 +32,12 @@ public class BookingController {
     @Autowired
     private CabinRepository cabinRepository;
 
+    @GetMapping
+    public ResponseEntity<List<Booking>> getAllBookings() {
+        List<Booking> bookings = bookingRepository.findAll();
+        return ResponseEntity.ok(bookings);
+    }
+
     @PostMapping
     public ResponseEntity<Void> createBooking(@RequestBody CreateBookingRequest request) {
         User user = userRepository.findById(request.getUserId()).orElseThrow();
@@ -39,18 +48,18 @@ public class BookingController {
         booking.setUser(user);
         booking.setFerryRide(ferryRide);
         //booking.setCabin(cabin);
-        booking.setBookingDate(request.getBookingDate());
+        
+        // Parse the bookingDate string to LocalDateTime
+        LocalDateTime bookingDateTime;
+        if (request.getBookingDate() != null && !request.getBookingDate().isEmpty()) {
+            bookingDateTime = LocalDateTime.parse(request.getBookingDate(), DateTimeFormatter.ISO_DATE_TIME);
+        } else {
+            bookingDateTime = LocalDateTime.now();
+        }
+        booking.setBookingDate(bookingDateTime);
 
         booking = bookingRepository.save(booking);
         URI location = URI.create("/api/bookings/" + booking.getId());
         return ResponseEntity.created(location).build();
-    }
-
-    @Data
-    public static class CreateBookingRequest {
-        private Long userId;
-        private Long ferryRideId;
-        private Long cabinId;
-        private LocalDateTime bookingDate;
     }
 }

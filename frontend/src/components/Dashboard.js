@@ -17,7 +17,7 @@ export default function Dashboard() {
     const [addSuccess, setAddSuccess] = useState(false);
 
     const [userRole, setUserRole] = useState(null);
-    const [selectedRideId, setSelectedRideId] = useState(null);
+    const [selectedRideId, setSelectedRideId] = useState("");
 
     useEffect(() => {
         const role = localStorage.getItem("userRole");
@@ -148,18 +148,34 @@ export default function Dashboard() {
             return;
         }
 
+        // Get userId from localStorage or use a default value for testing
+        const userId = localStorage.getItem("userId") || "1"; // Default to user ID 1 for testing
+        
+        const bookingData = {
+            userId: parseInt(userId),
+            ferryRideId: parseInt(selectedRideId), // Backend expects ferryRideId, not rideId
+            bookingDate: new Date().toISOString() // Current date/time
+        };
+
+        console.log("Booking data:", bookingData); // Debug log
+
         try {
             const response = await fetch("http://localhost:8080/api/bookings", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ rideId: parseInt(selectedRideId) }), // Backend erwartet rideId
+                body: JSON.stringify(bookingData),
             });
 
             if (response.ok) {
                 alert("Buchung erfolgreich erstellt!");
                 setSelectedRideId(""); // Reset Auswahl
+                // Refresh bookings if they are currently shown
+                if (showBookings) {
+                    handleShowBookings();
+                }
             } else {
                 const errorData = await response.json().catch(() => ({}));
+                console.error("Backend error:", response.status, errorData);
                 alert(`Fehler ${response.status}: ${errorData.message || "Buchung fehlgeschlagen."}`);
             }
         } catch (error) {

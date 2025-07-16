@@ -1,5 +1,6 @@
 package de.haw.busapp.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,9 +16,11 @@ public class Booking {
     private Long id;
 
     @ManyToOne
+    @JsonBackReference
     private User user;
 
     @ManyToOne
+    @JsonBackReference
     private FerryRide ferryRide;
 
     @ManyToOne
@@ -25,23 +28,41 @@ public class Booking {
 
     private LocalDateTime bookingDate;
 
-    // Manuelle Implementierung falls kein Lombok:
+    // Getter methods
+    public Long getId() {
+        return id;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public FerryRide getFerryRide() {
+        return ferryRide;
+    }
+
+    public Cabin getCabin() {
+        return cabin;
+    }
+
+    public LocalDateTime getBookingDate() {
+        return bookingDate;
+    }
+
+    // Setter methods
     public void setUser(User user) {
-        this.user = Objects.requireNonNull(user, "User darf nicht null sein");
-        user.getBookings().add(this); // Aktualisiere inverse Seite
+        this.user = user;
     }
 
     public void setFerryRide(FerryRide ferryRide) {
-        this.ferryRide = Objects.requireNonNull(ferryRide, "Fährfahrt darf nicht null sein");
-        ferryRide.getBookings().add(this);
+        this.ferryRide = ferryRide;
     }
 
     public void setCabin(Cabin cabin) {
-        this.cabin = Objects.requireNonNull(cabin, "Kabine darf nicht null sein");
-        cabin.getBookings().add(this);
+        this.cabin = cabin;
     }
 
     public void setBookingDate(LocalDateTime bookingDate) {
-        this.bookingDate = Objects.requireNonNull(bookingDate, "Buchungsdatum darf nicht null sein");
+        this.bookingDate = bookingDate;
     }
 }
