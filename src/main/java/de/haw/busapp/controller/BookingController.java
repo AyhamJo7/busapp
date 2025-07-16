@@ -42,7 +42,17 @@ public class BookingController {
             .collect(Collectors.toList());
         return ResponseEntity.ok(bookingResponses);
     }
-    
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<BookingResponse>> 
+    getBookingsByUser(@PathVariable Long userId) {
+        List<Booking> bookings = bookingRepository.findByUserId(userId);
+        List<BookingResponse> bookingResponses = bookings.stream()
+            .map(this::convertToBookingResponse)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(bookingResponses);
+    }
+
     private BookingResponse convertToBookingResponse(Booking booking) {
         FerryRide ferryRide = booking.getFerryRide();
         

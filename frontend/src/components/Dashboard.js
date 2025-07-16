@@ -107,7 +107,15 @@ export default function Dashboard() {
         setLoadingBookings(true);
 
         try {
-            const response = await fetch("http://localhost:8080/api/bookings");
+            const userId = localStorage.getItem("userId");
+            if (!userId) {
+                console.error("Keine Benutzer-ID gefunden");
+                setBookings([]);
+                setLoadingBookings(false);
+                return;
+            }
+
+            const response = await fetch(`http://localhost:8080/api/bookings/user/${userId}`);
             if (response.ok) {
                 const data = await response.json();
                 setBookings(data);
@@ -186,11 +194,13 @@ export default function Dashboard() {
             alert("Netzwerkproblem oder Server nicht erreichbar.");
         }
     };
-    // Logout handler
+    // Logout function
     const handleLogout = () => {
-        localStorage.removeItem("userID");
+        // Clear user data from localStorage
+        localStorage.removeItem("userId");
         localStorage.removeItem("userRole");
-
+        
+        // Navigate back to login/registration page
         navigate("/");
     };
 
