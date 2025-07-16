@@ -248,20 +248,51 @@ export default function Dashboard() {
                         <div>❌ Keine Buchungen vorhanden.</div>
                     ) : (
                         <ul style={{ listStyle: "none", padding: 0 }}>
-                            {bookings.map(b => (
-                                <li
-                                    key={b.id}
-                                    style={{
-                                        backgroundColor: "#ffffff",
-                                        borderRadius: "8px",
-                                        padding: "10px",
-                                        margin: "8px 0",
-                                        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-                                    }}
-                                >
-                                    🛳 {b.fahrtName} am {b.datum}
-                                </li>
-                            ))}
+                            {bookings.map(b => {
+                                // Format the booking date
+                                const bookingDate = new Date(b.bookingDate).toLocaleDateString('de-DE', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                
+                                // Format departure time
+                                const departureTime = new Date(b.ferryRide.departureTime).toLocaleDateString('de-DE', {
+                                    year: 'numeric',
+                                    month: '2-digit',
+                                    day: '2-digit',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+
+                                return (
+                                    <li
+                                        key={b.id}
+                                        style={{
+                                            backgroundColor: "#ffffff",
+                                            borderRadius: "8px",
+                                            padding: "15px",
+                                            margin: "8px 0",
+                                            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+                                        }}
+                                    >
+                                        <div style={{ marginBottom: "8px", fontWeight: "bold", color: "#0077b6" }}>
+                                            🛳 {b.ferryRide.route.originHarbor.name} ➡ {b.ferryRide.route.destinationHarbor.name}
+                                        </div>
+                                        <div style={{ fontSize: "14px", color: "#666" }}>
+                                            🚢 Schiff: {b.ferryRide.ship.name}
+                                        </div>
+                                        <div style={{ fontSize: "14px", color: "#666" }}>
+                                            🕒 Abfahrt: {departureTime}
+                                        </div>
+                                        <div style={{ fontSize: "14px", color: "#666" }}>
+                                            📅 Gebucht am: {bookingDate}
+                                        </div>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )}
                 </div>

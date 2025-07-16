@@ -1,5 +1,6 @@
 package de.haw.busapp.controller;
 
+import de.haw.busapp.dto.BookingResponse;
 import de.haw.busapp.dto.CreateBookingRequest;
 import de.haw.busapp.model.Booking;
 import de.haw.busapp.model.User;
@@ -18,6 +19,7 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -33,9 +35,54 @@ public class BookingController {
     private CabinRepository cabinRepository;
 
     @GetMapping
-    public ResponseEntity<List<Booking>> getAllBookings() {
+    public ResponseEntity<List<BookingResponse>> getAllBookings() {
         List<Booking> bookings = bookingRepository.findAll();
-        return ResponseEntity.ok(bookings);
+        List<BookingResponse> bookingResponses = bookings.stream()
+            .map(this::convertToBookingResponse)
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(bookingResponses);
+    }
+    
+    private BookingResponse convertToBookingResponse(Booking booking) {
+        FerryRide ferryRide = booking.getFerryRide();
+        
+        BookingResponse.HarborInfo originHarbor = new BookingResponse.HarborInfo(
+            ferryRide.getRoute().getOriginHarbor().getId(),
+            ferryRide.getRoute().getOriginHarbor().getName(),
+            ferryRide.getRoute().getOriginHarbor().getLocation()
+        );
+        
+        BookingResponse.HarborInfo destinationHarbor = new BookingResponse.HarborInfo(
+            ferryRide.getRoute().getDestinationHarbor().getId(),
+            ferryRide.getRoute().getDestinationHarbor().getName(),
+            ferryRide.getRoute().getDestinationHarbor().getLocation()
+        );
+        
+        BookingResponse.RouteInfo routeInfo = new BookingResponse.RouteInfo(
+            ferryRide.getRoute().getId(),
+            originHarbor,
+            destinationHarbor
+        );
+        
+        BookingResponse.ShipInfo shipInfo = new BookingResponse.ShipInfo(
+            ferryRide.getShip().getId(),
+            ferryRide.getShip().getName(),
+            ferryRide.getShip().getCapacity()
+        );
+        
+        BookingResponse.FerryRideInfo ferryRideInfo = new BookingResponse.FerryRideInfo(
+            ferryRide.getId(),
+            ferryRide.getDepartureTime(),
+            ferryRide.getArrivalTime(),
+            routeInfo,
+            shipInfo
+        );
+        
+        return new BookingResponse(
+            booking.getId(),
+            booking.getBookingDate(),
+            ferryRideInfo
+        );
     }
 
     @PostMapping
