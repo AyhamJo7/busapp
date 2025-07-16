@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
+    const navigate = useNavigate();
+    
     const [bookings, setBookings] = useState([]);
     const [showBookings, setShowBookings] = useState(false);
     const [loadingBookings, setLoadingBookings] = useState(false);
@@ -183,6 +186,13 @@ export default function Dashboard() {
             alert("Netzwerkproblem oder Server nicht erreichbar.");
         }
     };
+    // Logout handler
+    const handleLogout = () => {
+        localStorage.removeItem("userID");
+        localStorage.removeItem("userRole");
+
+        navigate("/");
+    };
 
     return (
         <div
@@ -194,6 +204,28 @@ export default function Dashboard() {
                 color: "#023047",
             }}
         >
+            {/* Logout button in top-right corner */}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
+                <button
+                    onClick={handleLogout}
+                    style={{
+                        backgroundColor: "#dc3545",
+                        color: "#fff",
+                        border: "none",
+                        borderRadius: "20px",
+                        padding: "8px 16px",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                        cursor: "pointer",
+                        transition: "0.3s",
+                        fontSize: "14px",
+                    }}
+                    onMouseOver={(e) => e.target.style.backgroundColor = "#c82333"}
+                    onMouseOut={(e) => e.target.style.backgroundColor = "#dc3545"}
+                >
+                    ⏻ Abmelden
+                </button>
+            </div>
+
             <h1 style={{ textAlign: "center", color: "#0077b6" }}>
                 🚢 FerryBooking
             </h1>
