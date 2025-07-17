@@ -12,8 +12,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build"
+    "build": "react-scripts build",
+    "test": "echo \"No tests yet\"",
+    "lint": "echo \"No linting yet\""
   },
+  
   "browserslist": {
     "production": [
       ">0.2%",
